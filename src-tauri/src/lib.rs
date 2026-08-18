@@ -1355,7 +1355,10 @@ async fn get_interaction(
 }
 
 #[tauri::command]
-fn open_detail_window(interaction_id: i64, app: tauri::AppHandle) -> Result<(), CommandError> {
+async fn open_detail_window(
+    interaction_id: i64,
+    app: tauri::AppHandle,
+) -> Result<(), CommandError> {
     if interaction_id < 1 {
         return Err(CommandError::new(
             "invalidInteraction",
