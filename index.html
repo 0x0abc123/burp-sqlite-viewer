@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover is required for the safe-area insets used in app.css on iOS. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Burp SQLite Viewer</title>
+    <script>
+      // Resolve the theme before first paint, so [data-theme] is always present.
+      // Tailwind's `dark:` variant is keyed to that attribute (see app.css), and a class
+      // applied after hydration would flash the wrong theme on launch.
+      document.documentElement.dataset.theme =
+        localStorage.getItem('theme') ??
+        (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

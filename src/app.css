@@ -1,0 +1,305 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Design token layer + base element styles + shadcn-svelte bridge.
+ *
+ * This file is the single source of visual truth for the app. The `design-ui` skill
+ * rewrites the token block below from the agreed design plan; component `<style>` blocks
+ * consume tokens and MUST NOT hard-code colours, font sizes or spacing values. shadcn
+ * components consume the same tokens through the @theme inline block at the foot.
+ *
+ * Three structural rules, all load-bearing. Changing any of them silently breaks either
+ * our styling or shadcn's, with no error:
+ *
+ *   1. `@import 'tailwindcss'` comes FIRST, and the :root token blocks come AFTER it and
+ *      stay UNLAYERED. Tailwind puts its own defaults in @layer theme, and unlayered
+ *      declarations beat layered ones, so our tokens win. That is deliberate: Tailwind's
+ *      `--radius-*` and `--text-*` theme namespaces use the same names as our tokens, so
+ *      `rounded-lg` and `text-xl` resolve to our scale rather than Tailwind's.
+ *
+ *   2. Base element rules live INSIDE `@layer base`, with ordinary selectors rather than
+ *      the `:where()` wrapper the plain-CSS template uses. Left unlayered they would beat
+ *      Tailwind's utilities — `button { font: inherit }` overrides shadcn's `text-sm`,
+ *      and the button silently renders a size too large. Inside @layer base they lose to
+ *      @layer utilities, which is correct, and still lose to Svelte's scoped component
+ *      styles, which are unlayered.
+ *
+ *   3. Our base rules come after Tailwind's preflight in the same layer. Preflight resets
+ *      heading font-size to `inherit` at the same specificity, so source order is what
+ *      keeps our typography. Do not move this file's import ahead of Tailwind's.
+ *
+ * The `dark` variant is keyed to [data-theme] rather than shadcn's default `.dark` class,
+ * so one mechanism drives both systems. index.html resolves the attribute before paint.
+ */
+
+/* ---------------------------------------------------------------- tokens */
+
+:root {
+  /* Colour — semantic roles, never raw hues at the point of use.
+     Hierarchy comes from spacing, type and position; colour carries *meaning*:
+     accent = primary action, danger = destructive, warning, success. */
+  --surface: #ffffff;
+  --surface-raised: #f7f8f9;
+  --surface-sunken: #eef0f2;
+  /* --border separates and groups (decorative, no contrast floor).
+     --border-strong bounds a control and therefore must clear 3:1 against the surface
+     behind it — WCAG 1.4.11. Measured: 3.70:1 on --surface, 3.48:1 on --surface-raised. */
+  --border: #d6dade;
+  --border-strong: #7d868f;
+  --text: #14181c;
+  --text-muted: #5a6570;
+  --accent: #1a56c4;
+  --accent-hover: #14459e;
+  --accent-contrast: #ffffff;
+  --danger: #b3261e;
+  --danger-contrast: #ffffff;
+  --warning: #8a5300;
+  --success: #16653f;
+  --focus-ring: #1a56c4;
+
+  /* Type — two roles: UI text and tabular/monospace data. A third display face is added
+     by the design plan only when the brief justifies one. */
+  --font-ui:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Limited scale — six steps. Resist adding more. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.55;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold: 650;
+
+  /* Space — 4px base. Grouping is communicated by spacing before borders. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.06);
+
+  /* Targets — 44px minimum on touch (Fitts's Law; also the iOS/Android guidance). */
+  --control-height: 2.25rem;
+  --touch-target-min: 44px;
+
+  /* Reading measure — short line lengths aid comprehension. */
+  --measure: 68ch;
+
+  /* Dense traffic-workspace geometry. Components consume these rather than deciding
+     one-off dimensions outside the token layer. */
+  --table-min-width: 64rem;
+  --table-max-height: 24rem;
+  --url-column-max-width: 28rem;
+  --message-pane-min-height: 12rem;
+  --message-pane-max-height: 28rem;
+  --selection-rail-width: 0.25rem;
+
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Dark palette. Redefine tokens only — never restyle components per theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --surface: #0e1216;
+    --surface-raised: #171c22;
+    --surface-sunken: #0a0d10;
+    --border: #2a323b;
+    --border-strong: #616e7b;
+    --text: #e6eaee;
+    --text-muted: #9aa5b1;
+    --accent: #7aa9ff;
+    --accent-hover: #9dc0ff;
+    --accent-contrast: #0b1220;
+    --danger: #ff8a80;
+    --danger-contrast: #1a0b0a;
+    --warning: #f0b429;
+    --success: #5ddba0;
+    --focus-ring: #7aa9ff;
+    --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.5), 0 4px 12px rgb(0 0 0 / 0.4);
+  }
+}
+
+/* Explicit user choice wins over the OS in both directions. */
+:root[data-theme='dark'] {
+  --surface: #0e1216;
+  --surface-raised: #171c22;
+  --surface-sunken: #0a0d10;
+  --border: #2a323b;
+  --border-strong: #616e7b;
+  --text: #e6eaee;
+  --text-muted: #9aa5b1;
+  --accent: #7aa9ff;
+  --accent-hover: #9dc0ff;
+  --accent-contrast: #0b1220;
+  --danger: #ff8a80;
+  --danger-contrast: #1a0b0a;
+  --warning: #f0b429;
+  --success: #5ddba0;
+  --focus-ring: #7aa9ff;
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.5), 0 4px 12px rgb(0 0 0 / 0.4);
+}
+
+/* ----------------------------------------------------------- base styles */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+    /* No rubber-band scroll: a desktop/mobile app window, not a web page. */
+    overscroll-behavior: none;
+    /* Suppress the grey flash on tap without removing any affordance. */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4 {
+    margin: 0;
+    line-height: var(--leading-tight);
+    font-weight: var(--weight-bold);
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+  }
+  h2 {
+    font-size: var(--text-xl);
+  }
+  h3 {
+    font-size: var(--text-lg);
+  }
+
+  p, ul, ol {
+    margin: 0;
+    max-width: var(--measure);
+  }
+
+  a {
+    color: var(--accent);
+    text-underline-offset: 0.2em;
+  }
+
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+    font-size: 0.9375em;
+  }
+
+  /* Controls inherit type by default — browsers do not do this for us. */
+  button, input, select, textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* One focus treatment for the whole app. Never `outline: none` without a replacement. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  :disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Visually hidden but reachable by assistive tech and by keyboard focus. */
+  .visually-hidden:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Motion communicates state and causality only. Honour the OS preference. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* --------------------------------------------------- shadcn-svelte bridge */
+
+/*
+ * shadcn components are styled with Tailwind utilities (`bg-primary`,
+ * `text-muted-foreground`), which resolve through these `--color-*` entries. Mapping them
+ * straight onto our tokens means shadcn's own raw variables (--background, --primary, …)
+ * are never defined at all — which is what avoids the name clash on `--accent`, where
+ * shadcn means "subtle hover background" and we mean "primary action colour".
+ *
+ * `inline` matters: it inlines var() references into the utilities instead of emitting a
+ * second copy of the variable, so a token that changes with the theme carries through.
+ */
+@theme inline {
+  --color-background: var(--surface);
+  --color-foreground: var(--text);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--surface-raised);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-contrast);
+  --color-secondary: var(--surface-raised);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--surface-raised);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--surface-sunken);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--danger-contrast);
+  --color-border: var(--border);
+  --color-input: var(--border-strong);
+  --color-ring: var(--focus-ring);
+}
+
+/*
+ * shadcn's own generated code refers to `--radius-md` directly in a few places, which is
+ * already one of our tokens. Nothing to bridge — noted so nobody "fixes" it.
+ */

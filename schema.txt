@@ -1,0 +1,19 @@
+CREATE TABLE http_interactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    captured_at INTEGER NOT NULL,
+    tool TEXT NOT NULL,
+    scheme TEXT NOT NULL,
+    host TEXT NOT NULL,
+    port INTEGER NOT NULL,
+    method TEXT NOT NULL,
+    url TEXT NOT NULL,
+    status_code INTEGER NOT NULL,
+    mime_type TEXT NOT NULL,
+    request BLOB NOT NULL,
+    response BLOB NOT NULL,
+    response_length INTEGER GENERATED ALWAYS AS (length(response)) VIRTUAL,
+    notes TEXT,
+    metadata TEXT
+);
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE INDEX idx_http_interactions_captured_at ON http_interactions(captured_at);

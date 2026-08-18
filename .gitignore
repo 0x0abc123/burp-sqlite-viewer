@@ -1,0 +1,20 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Tauri mobile: generated projects. Regenerate with `npm run tauri android init`.
+# Commit these instead if you hand-edit the manifest, Gradle files or Xcode settings.
+/src-tauri/gen/android
+/src-tauri/gen/apple

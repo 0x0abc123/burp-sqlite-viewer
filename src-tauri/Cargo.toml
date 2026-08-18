@@ -1,0 +1,35 @@
+[package]
+name = "burp_sqlite_viewer"
+version = "0.1.0"
+description = "Burp SQLite Viewer"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix keeps the library name distinct from the binary name; without it the
+# Windows build collides (rust-lang/cargo#8519).
+#
+# `staticlib` and `cdylib` are what the iOS and Android builds link against. Removing
+# either breaks mobile with a linker error that does not mention this line.
+name = "burp_sqlite_viewer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+tauri-plugin-dialog = "2.7.2"
+
+# Read the optimisation guideline for more detail: https://tauri.app/concept/size/
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
