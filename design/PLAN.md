@@ -156,6 +156,10 @@ Every interaction has a slim “evidence rail” combining a named marker, note 
 
 The traffic table is intentionally dense, with fixed utility typography, aligned timestamps and numbers, sticky headers, subtle row separators, and one selected-row treatment. Raw message panes are dense but calm, while replay settings and annotation editing use generous form spacing. Virtualisation and keyset pagination prevent large captures from degrading interaction latency.
 
+Table density is a persisted display preference with **Compact** and **Comfortable** modes. Compact is the default for this traffic-analysis workspace and reduces row height and vertical cell padding while retaining the minimum keyboard focus treatment and legible line height. The density control changes table rows only; it does not compress forms, alerts, or request/response reading surfaces.
+
+Routine status and diagnostics do not consume permanent space above the interaction table. Short success/progress messages appear in the footer status region. Warnings and errors appear in a footer-adjacent alert region with a visible dismiss action; actionable failures remain available until dismissed or superseded. A compact diagnostics disclosure provides access to technical details such as the raw epoch-millisecond timestamp without pushing the request/response panes below the initial viewport.
+
 ## Keyboard
 
 - `Ctrl/Cmd+O`: open a database.
@@ -216,7 +220,7 @@ ReplayDraft { sourceFingerprint, originalBytes, byteEdits, targetUrl, route }
 ReplayResult { status?, headers, bodyBytes, timings, remoteAddress?, error? }
 ```
 
-Filter operators are fixed by type: text (`contains`, `equals`, `starts with`, `is empty`), numbers (`=`, `!=`, `<`, `≤`, `>`, `≥`, `between`), timestamps (`before`, `after`, `between`) and metadata (`has note`, colour/tag/icon equals). Multiple filters combine with AND in version 1; an advanced AND/OR group builder is deferred until evidence shows it is needed. `captured_at` is interpreted as epoch milliseconds only after a plausible-range check; diagnostics include the untouched integer value.
+Filter operators are fixed by type: text (`contains`, `equals`, `starts with`, `ends with`, `is empty`), numbers (`=`, `!=`, `<`, `≤`, `>`, `≥`, `between`), timestamps (`before`, `after`, `between`) and metadata (`has note`, colour/tag/icon equals). Multiple filters combine with AND in version 1; an advanced AND/OR group builder is deferred until evidence shows it is needed. `captured_at` is interpreted as epoch milliseconds only after a plausible-range check; diagnostics include the untouched integer value.
 
 ## Safety and correctness decisions
 
@@ -253,6 +257,15 @@ Filter operators are fixed by type: text (`contains`, `equals`, `starts with`, `
 3. Add single, additive and range row selection, table/grid keyboard navigation, and accessible announcements for selection/sort/filter/result changes.
 
 **Exit:** every schema column except raw BLOBs is optionally visible; sorting/filtering combinations have SQL unit tests and keyboard acceptance tests.
+
+### Phase 2.1 — workspace density and diagnostic ergonomics
+
+1. Move routine operation status into the persistent footer and replace the top diagnostics block with a footer-adjacent, dismissible alert region plus a compact diagnostics disclosure for technical details.
+2. Add persisted **Compact** and **Comfortable** table-density modes, defaulting to Compact, using design tokens for row height and vertical cell padding.
+3. Add the text `ends with` operator to the typed frontend contract and Rust allow-list compiler, escaping SQL `LIKE` metacharacters identically to `contains` and `starts with`.
+4. Add tests for alert dismissal and retention, density persistence and keyboard usability, and literal `%`, `_`, and `\` behaviour in all three pattern filters.
+
+**Exit:** the selected request/response remains visible in the initial desktop viewport at the supported default window size; dismissed alerts stay out of the way until a new diagnostic occurs; Compact mode materially increases visible row count without clipping focus or text; and `ends with` is parameterised and behaves literally for escaped wildcard characters.
 
 ### Phase 3 — message inspection and detached windows
 
@@ -300,6 +313,9 @@ Filter operators are fixed by type: text (`contains`, `equals`, `starts with`, `
 
 ## Confirmed decisions
 
+- Keep routine diagnostics out of the top workspace: use footer status, dismissible footer-adjacent alerts, and an on-demand technical-details disclosure.
+- Default the interaction table to a persisted Compact density, with Comfortable available as a display preference.
+- Include `ends with` among the allow-listed text filter operators.
 - Export a selected interaction's request or response as its own byte-exact file.
 - Metadata is exactly `{ "colour": "<colour-ID>", "tag": "<user-defined-tag>", "icon": "<icon-ID>" }`; Tag and Icon are table columns, colour highlights the row, and annotations support one or many selected rows.
 - `captured_at` is epoch milliseconds; validate plausible ranges and expose raw values in diagnostics.

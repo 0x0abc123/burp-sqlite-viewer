@@ -57,6 +57,14 @@
   --danger-contrast: #ffffff;
   --warning: #8a5300;
   --success: #16653f;
+  --syntax-header: #76520b;
+  --syntax-keyword: #7b2f87;
+  --marker-red: #ffd6d9;
+  --marker-orange: #ffe0bf;
+  --marker-yellow: #fff0a8;
+  --marker-green: #cdefd5;
+  --marker-blue: #d5e6ff;
+  --marker-purple: #ead7ff;
   --focus-ring: #1a56c4;
 
   /* Type — two roles: UI text and tabular/monospace data. A third display face is added
@@ -110,6 +118,15 @@
   --message-pane-min-height: 12rem;
   --message-pane-max-height: 28rem;
   --selection-rail-width: 0.25rem;
+  --selection-column-width: 4rem;
+  --column-chooser-width: 30rem;
+  --column-chooser-max-height: 32rem;
+  --splitter-size: var(--space-2);
+  --stacked-pair-height: 40rem;
+  --annotation-notes-height: 8rem;
+  --replay-editor-height: 22rem;
+  --table-cell-padding-block-compact: 0;
+  --table-cell-padding-block-comfortable: var(--space-2);
 
   --motion-fast: 120ms;
   --motion-base: 200ms;
@@ -133,6 +150,14 @@
     --danger-contrast: #1a0b0a;
     --warning: #f0b429;
     --success: #5ddba0;
+    --syntax-header: #f0b75a;
+    --syntax-keyword: #e6a8ef;
+    --marker-red: #54242a;
+    --marker-orange: #50301b;
+    --marker-yellow: #494015;
+    --marker-green: #183f27;
+    --marker-blue: #1c355b;
+    --marker-purple: #3b2455;
     --focus-ring: #7aa9ff;
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.5), 0 4px 12px rgb(0 0 0 / 0.4);
   }
@@ -154,6 +179,14 @@
   --danger-contrast: #1a0b0a;
   --warning: #f0b429;
   --success: #5ddba0;
+  --syntax-header: #f0b75a;
+  --syntax-keyword: #e6a8ef;
+  --marker-red: #54242a;
+  --marker-orange: #50301b;
+  --marker-yellow: #494015;
+  --marker-green: #183f27;
+  --marker-blue: #1c355b;
+  --marker-purple: #3b2455;
   --focus-ring: #7aa9ff;
   --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.5), 0 4px 12px rgb(0 0 0 / 0.4);
 }

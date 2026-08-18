@@ -10,15 +10,52 @@ export interface CommandError {
 export interface DatabaseSummary {
   displayName: string
   path: string
-  mode: 'read-only'
+  mode: 'read-only' | 'read-write'
   rowCount: number
   schemaVariant: 'current' | 'legacy'
   diagnostics: string[]
 }
 
 export interface PageCursor {
-  capturedAt: number
-  id: number
+  offset: number
+}
+
+export type SortField =
+  | 'id'
+  | 'capturedAt'
+  | 'tool'
+  | 'scheme'
+  | 'host'
+  | 'port'
+  | 'method'
+  | 'url'
+  | 'statusCode'
+  | 'mimeType'
+  | 'responseLength'
+  | 'colour'
+  | 'tag'
+  | 'icon'
+export type SortDirection = 'asc' | 'desc'
+export type FilterField = SortField
+export type FilterOperator =
+  | 'contains'
+  | 'equals'
+  | 'startsWith'
+  | 'endsWith'
+  | 'isEmpty'
+  | 'greaterThan'
+  | 'lessThan'
+
+export interface FilterSpec {
+  field: FilterField
+  operator: FilterOperator
+  value: string
+}
+
+export interface QuerySpec {
+  sortField: SortField
+  sortDirection: SortDirection
+  filters: FilterSpec[]
 }
 
 export interface InteractionSummary {
@@ -44,6 +81,7 @@ export interface InteractionSummary {
 export interface InteractionPage {
   rows: InteractionSummary[]
   nextCursor: PageCursor | null
+  filteredCount: number
 }
 
 export interface MessagePreview {
@@ -54,6 +92,11 @@ export interface MessagePreview {
 
 export interface InteractionDetail {
   id: number
+  capturedAt: number
+  method: string
+  url: string
+  statusCode: number
+  mimeType: string
   request: MessagePreview
   response: MessagePreview
   notes: string | null
@@ -63,6 +106,43 @@ export interface InteractionDetail {
 export interface ExportResult {
   path: string
   byteCount: number
+}
+
+export interface AnnotationInput {
+  interactionIds: number[]
+  updateNotes: boolean
+  notes: string
+  updateColour: boolean
+  colour: string
+  updateTag: boolean
+  tag: string
+  updateIcon: boolean
+  icon: string
+}
+
+export interface AnnotationResult {
+  updatedCount: number
+}
+
+export interface ReplayInput {
+  interactionId: number
+  targetUrl: string
+  draftBytes: number[] | null
+  proxyUrl: string | null
+  proxyUsername: string
+  proxyPassword: string
+  followRedirects: boolean
+  timeoutSeconds: number
+}
+
+export interface ReplayResult {
+  historyId: number
+  requestBytes: number[]
+  responseBytes: number[]
+  statusCode: number | null
+  elapsedMillis: number
+  error: string | null
+  normalisedByHttpClient: boolean
 }
 
 export function commandError(error: unknown): CommandError {
@@ -97,15 +177,32 @@ export async function openDatabase(path: string): Promise<DatabaseSummary> {
   return await invoke<DatabaseSummary>('open_database', { path })
 }
 
+export async function enableAnnotations(): Promise<DatabaseSummary> {
+  return await invoke<DatabaseSummary>('enable_annotations')
+}
+
+export async function annotateInteractions(annotation: AnnotationInput): Promise<AnnotationResult> {
+  return await invoke<AnnotationResult>('annotate_interactions', { annotation })
+}
+
+export async function replayRequest(replay: ReplayInput): Promise<ReplayResult> {
+  return await invoke<ReplayResult>('replay_request', { replay })
+}
+
 export async function queryInteractions(
+  query: QuerySpec,
   cursor: PageCursor | null = null,
   pageSize = 100,
 ): Promise<InteractionPage> {
-  return await invoke<InteractionPage>('query_interactions', { cursor, pageSize })
+  return await invoke<InteractionPage>('query_interactions', { query, cursor, pageSize })
 }
 
 export async function getInteraction(interactionId: number): Promise<InteractionDetail> {
   return await invoke<InteractionDetail>('get_interaction', { interactionId })
+}
+
+export async function openDetailWindow(interactionId: number): Promise<void> {
+  await invoke('open_detail_window', { interactionId })
 }
 
 export async function exportInteractionPart(
@@ -113,6 +210,14 @@ export async function exportInteractionPart(
   part: 'request' | 'response',
 ): Promise<ExportResult | null> {
   return await invoke<ExportResult | null>('export_interaction_part', { interactionId, part })
+}
+
+export async function saveMessageSelection(
+  interactionId: number,
+  part: 'request' | 'response',
+  text: string,
+): Promise<ExportResult | null> {
+  return await invoke<ExportResult | null>('save_message_selection', { interactionId, part, text })
 }
 
 export async function closeDatabase(): Promise<void> {

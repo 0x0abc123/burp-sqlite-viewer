@@ -1,15 +1,17 @@
 <script lang="ts">
   import TrafficWorkspace from './lib/TrafficWorkspace.svelte'
+  import InteractionDetailWindow from './lib/InteractionDetailWindow.svelte'
+
+  const detailValue = new URLSearchParams(window.location.search).get('detail')
+  const detailId = detailValue && /^\d+$/.test(detailValue) ? Number(detailValue) : null
 </script>
 
+{#if detailId !== null}
+  <InteractionDetailWindow interactionId={detailId} />
+{:else}
 <a class="visually-hidden skip" href="#workspace">Skip to main content</a>
 
 <div class="app">
-  <header>
-    <h1>Burp SQLite Viewer</h1>
-    <p>Captured HTTP traffic</p>
-  </header>
-
   <main id="workspace" tabindex="-1">
     <TrafficWorkspace />
   </main>
@@ -18,29 +20,17 @@
     <p>Local desktop inspection · Original request and response bytes remain unchanged</p>
   </footer>
 </div>
+{/if}
 
 <style>
   .app {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: 1fr auto;
     min-height: 100dvh;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
       env(safe-area-inset-left);
   }
 
-  header {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-5);
-    border-bottom: 1px solid var(--border);
-  }
-
-  header h1 {
-    font-size: var(--text-lg);
-  }
-
-  header p,
   footer {
     color: var(--text-muted);
     font-size: var(--text-sm);
