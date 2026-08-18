@@ -56,7 +56,6 @@
         <h1>{detail.method} {detail.url}</h1>
         <p>Interaction {detail.id} · Status {detail.statusCode} · {new Date(detail.capturedAt).toLocaleString()}</p>
       </div>
-      <button type="button" onclick={() => window.close()}>Close window</button>
     </header>
     <MessagePair {detail} onexport={exportPart} {exporting} />
   {:else if loading}

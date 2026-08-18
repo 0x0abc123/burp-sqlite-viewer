@@ -1374,7 +1374,10 @@ fn open_detail_window(interaction_id: i64, app: tauri::AppHandle) -> Result<(), 
         })?;
         return Ok(());
     }
-    let url = tauri::WebviewUrl::App(format!("index.html?detail={interaction_id}").into());
+    // Keep the bundled resource URL query-free. The frontend obtains the interaction ID
+    // from this window's `detail-<id>` label, avoiding the Windows WebView2 resource-request
+    // hang observed while resolving `index.html?detail=<id>`.
+    let url = tauri::WebviewUrl::App("index.html".into());
     tauri::WebviewWindowBuilder::new(&app, label, url)
         .title(format!("Interaction {interaction_id} — Burp SQLite Viewer"))
         .inner_size(960.0, 720.0)

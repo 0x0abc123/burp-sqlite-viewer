@@ -1,9 +1,12 @@
 <script lang="ts">
   import TrafficWorkspace from './lib/TrafficWorkspace.svelte'
   import InteractionDetailWindow from './lib/InteractionDetailWindow.svelte'
+  import { currentDetailWindowId } from './lib/ipc'
 
   const detailValue = new URLSearchParams(window.location.search).get('detail')
-  const detailId = detailValue && /^\d+$/.test(detailValue) ? Number(detailValue) : null
+  const detailId = detailValue && /^\d+$/.test(detailValue)
+    ? Number(detailValue)
+    : currentDetailWindowId()
 </script>
 
 {#if detailId !== null}

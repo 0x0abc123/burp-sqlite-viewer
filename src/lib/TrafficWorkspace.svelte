@@ -671,7 +671,10 @@
     <section class="detail" aria-labelledby="detail-heading" aria-busy={loadingDetail}>
       <div class="detail-header">
         <div>
-          <h3 id="detail-heading">
+          <h3
+            id="detail-heading"
+            title={selected ? `${selected.method} ${selected.url}` : undefined}
+          >
             {selected ? `${selected.method} ${selected.url}` : 'Request and response'}
           </h3>
           <p>
@@ -777,6 +780,7 @@
   }
 
   .title-group p,
+  #detail-heading,
   .detail-header p {
     overflow: hidden;
     text-overflow: ellipsis;

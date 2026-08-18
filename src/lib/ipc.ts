@@ -1,5 +1,16 @@
 import { invoke } from '@tauri-apps/api/core'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { open } from '@tauri-apps/plugin-dialog'
+
+export function currentDetailWindowId(): number | null {
+  try {
+    const match = /^detail-(\d+)$/.exec(getCurrentWebviewWindow().label)
+    return match ? Number(match[1]) : null
+  } catch {
+    // Browser-only frontend development has no Tauri window metadata.
+    return null
+  }
+}
 
 export interface CommandError {
   code: string
